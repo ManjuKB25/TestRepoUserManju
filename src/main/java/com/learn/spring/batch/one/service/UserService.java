@@ -7,6 +7,9 @@ import com.learn.spring.batch.one.entity.UserData;
 import com.learn.spring.batch.one.exceptions.InvalidUserIDException;
 import com.learn.spring.batch.one.exceptions.UserNotFoundException;
 
+/* 
+ * Service Interface for User Service
+ * */
 public interface UserService {
 	public List<UserData> getAllUsers();
 
