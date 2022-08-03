@@ -12,3 +12,7 @@ Implemented:
 non-Functional:
 1) need to test on load.
 2) used mysql DB as data source
+
+Further Enhancements:
+1) Can conside consuming request parameters as a JSON object so that we can have wide range of filter and sort options.
+2) Enhaced for multi-value acceptence for user and age fileds. Also can do a generalization on feilds for furture enhancement of User object.
