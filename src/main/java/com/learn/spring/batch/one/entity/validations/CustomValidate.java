@@ -8,6 +8,8 @@ import com.learn.spring.batch.one.entity.UserData;
 
 public class CustomValidate {
 
+	private static int maxAgeLimit = 200;
+
 	public static boolean isValidField(String field) {
 		return BeanUtils.getPropertyDescriptor(UserData.class, field) != null;
 	}
@@ -22,7 +24,26 @@ public class CustomValidate {
 			}
 		}
 		for (String ele : dataQuery.keySet()) {
-			if (!(ele.equals("sortby"))) {
+			if (!(ele.equals("sortby")) && !(ele.equals("sortType"))) {
+				if (BeanUtils.getPropertyDescriptor(UserData.class, ele) == null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static boolean isValidField(Map<String, String> dataQuery) {
+		if (dataQuery.size() == 0)
+			return true;
+		if (dataQuery.containsKey("sortby")) {
+			String sortBy = dataQuery.get("sortby");
+			if (BeanUtils.getPropertyDescriptor(UserData.class, sortBy) == null) {
+				return false;
+			}
+		}
+		for (String ele : dataQuery.keySet()) {
+			if (!(ele.equals("sortby")) && !(ele.equals("sortType"))) {
 				if (BeanUtils.getPropertyDescriptor(UserData.class, ele) == null) {
 					return false;
 				}
@@ -60,7 +81,7 @@ public class CustomValidate {
 		} catch (NumberFormatException ex) {
 			return false;
 		}
-		if (ageField > 0 && ageField < 201)
+		if (ageField > 0 && ageField < maxAgeLimit)
 			return true;
 		else
 			return false;

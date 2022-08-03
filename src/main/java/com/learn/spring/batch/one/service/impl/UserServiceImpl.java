@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.learn.spring.batch.one.entity.UserData;
@@ -26,18 +27,25 @@ import com.learn.spring.batch.one.service.UserService;
 public class UserServiceImpl implements UserService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+	// Below properties can be read from a properties file to make them
+	// customizable.
+	private static final int defaultPageOffset = 0;
+	private static final int defaultPageSize = 100;
+	private static final String defaultSortField = "id";
 
 	@Autowired
 	private UserRepo repo;
 
 	@Override
-	public List<UserData> getAllUsers() {
-		List<UserData> userResult = repo.findAll();
+	public List<UserData> getAllUsers(String sortType) {
+		Pageable paging = PageRequest.of(defaultPageOffset, defaultPageSize,
+				Direction.fromOptionalString(sortType).orElse(Direction.DESC), defaultSortField);
+		Page<UserData> userResult = repo.findAll(paging);
 		if (userResult.isEmpty()) {
 			logger.warn("User Data repository is empty on get all users flow");
 			throw new EmptyUserRepoException("Users repository is empty");
 		}
-		return userResult;
+		return userResult.toList();
 	}
 
 	@Override
@@ -50,16 +58,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<UserData> getUsersSortBy(String field) {
-		if (!CustomValidate.isValidField(field)) {
-			throw new RequiredFieldsException("'" + field + "' is not a valid field for sorting");
+	public List<UserData> getUsersSortBy(Map<String, String> field) {
+		if (!CustomValidate.isValidFields(field)) {
+			throw new RequiredFieldsException("'" + field.get("sortby") + "' is not a valid field for sorting");
 		}
-		List<UserData> userResult = repo.findAll(Sort.by(field));
+		Pageable paging = PageRequest.of(defaultPageOffset, defaultPageSize,
+				Direction.fromOptionalString(field.get("sortType")).orElse(Direction.DESC), field.get("sortby"));
+		Page<UserData> userResult = repo.findAll(paging);
 		if (userResult.isEmpty()) {
 			logger.warn("User Data repository is empty on soryby flow");
 			throw new EmptyUserRepoException("Users repository is empty");
 		}
-		return userResult;
+		return userResult.toList();
 	}
 
 	@Override
@@ -87,12 +97,25 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserData> getUsersFilterBy(Map<String, String> dataQuery) {
-		if (!CustomValidate.isValidFields(dataQuery)) {
+		if (!CustomValidate.isValidField(dataQuery)) {
 			throw new RequiredFieldsException("Fields provided for filtering are not valid");
+		}
+		Pageable paging = PageRequest.of(defaultPageOffset, defaultPageSize,
+				Direction.fromOptionalString(dataQuery.get("sortType")).orElse(Direction.DESC), defaultSortField);
+		if (dataQuery.size() == 0) {
+			Page<UserData> userData = repo.findAll(paging);
+			if (userData.isEmpty()) {
+				logger.warn("No data existing for this query on filterBy flow");
+				throw new EmptyUserRepoException("No data existing for this query");
+			}
+			return userData.toList();
 		}
 		String name = dataQuery.get("name");
 		String age = dataQuery.get("age");
-		String sortby = dataQuery.get("sortby");
+		String sortby = dataQuery.get("sortby") != null ? dataQuery.get("sortby") : "id";
+		Direction sortType = Direction.fromOptionalString(dataQuery.get("sortType")).orElse(Direction.DESC);
+		paging = PageRequest.of(defaultPageOffset, defaultPageSize, sortType, sortby);
+
 		if (null != name && null != age) {
 			if (!CustomValidate.isValidAge(age)) {
 				throw new InvalidNumericValueException("Provided age parameter is invalid : " + age);
@@ -101,7 +124,7 @@ public class UserServiceImpl implements UserService {
 			if (sortby.isEmpty()) {
 				userData = repo.findByNameAndAge(name, Integer.parseInt(age));
 			} else {
-				userData = repo.findByNameAndAgeAndSort(name, Integer.parseInt(age), Sort.by(sortby));
+				userData = repo.findByNameAndAgeAndSort(name, Integer.parseInt(age), paging);
 			}
 			if (userData.isEmpty()) {
 				logger.warn("No data existing for this query on filterBy flow");
@@ -117,7 +140,7 @@ public class UserServiceImpl implements UserService {
 			if (sortby.isEmpty()) {
 				userData = repo.findByAge(Integer.parseUnsignedInt(age));
 			} else {
-				userData = repo.findByAge(Integer.parseUnsignedInt(age), Sort.by(sortby));
+				userData = repo.findByAge(Integer.parseUnsignedInt(age), paging);
 			}
 			if (userData.isEmpty()) {
 				logger.warn("No data existing for this query on filterBy flow");
@@ -125,17 +148,25 @@ public class UserServiceImpl implements UserService {
 			}
 			return userData;
 		}
-		List<UserData> userData = new ArrayList<UserData>();
-		if (sortby.isEmpty()) {
-			userData = repo.findByName(name);
-		} else {
-			userData = repo.findByName(name, Sort.by(sortby));
+		if (null != name) {
+			List<UserData> userData = new ArrayList<UserData>();
+			if (sortby.isEmpty()) {
+				userData = repo.findByName(name);
+			} else {
+				userData = repo.findByName(name, paging);
+			}
+			if (userData.isEmpty()) {
+				logger.warn("No data existing for this query on filterBy flow");
+				throw new EmptyUserRepoException("No data existing for this query");
+			}
+			return userData;
 		}
+		Page<UserData> userData = repo.findAll(paging);
 		if (userData.isEmpty()) {
 			logger.warn("No data existing for this query on filterBy flow");
 			throw new EmptyUserRepoException("No data existing for this query");
 		}
-		return userData;
+		return userData.toList();
 	}
 
 	@Override

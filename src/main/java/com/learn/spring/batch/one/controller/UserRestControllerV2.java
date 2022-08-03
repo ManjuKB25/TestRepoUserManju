@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,52 +20,28 @@ import com.learn.spring.batch.one.exceptions.RequiredFieldsException;
 import com.learn.spring.batch.one.exceptions.UserNotFoundException;
 import com.learn.spring.batch.one.service.UserService;
 
+/*
+ * Version 2 of User data with single mapping having filters and sort along with sort type as request params.
+ *
+ */
 @RestController
-@RequestMapping("/api/V1.0")
-public class UserRestController {
-
+@RequestMapping("/api/V2.0")
+public class UserRestControllerV2 {
 	@Autowired
 	private UserService service;
 
-	/*
-	 * Get of Users. Limited to top 100 records, along with default sort order as
-	 * DESC on 'id' field. Ex: /users or /users?sortType=asc
-	 */
+	/* 
+	 * supproted queries:
+	 * /users -- List top 100 users sorted on id, desc
+	 * /users?name=<name> -- List top 100 users filtered by name, sorted on id, desc
+	 * /users?age=<age> -- List top 100 users filtered by age, sorted on id, desc
+	 * /users?name=<name>&age=<age> -- List top 100 users filtered by name and age, sorted on id, desc
+	 * /users?sortby=<field>&sortType=asc -- List top 100 users sorted on filed, asc
+	 * etc.
+	 * */
 	@GetMapping("/users")
-	public List<UserData> getAllUsers(@RequestParam(required = false, defaultValue = "DESC") String sortType) {
-		return service.getAllUsers(sortType);
-	}
-
-	/*
-	 * Get of specific user when valid userId is provided. Validations of userId is honored.
-	 */
-	@GetMapping("/users/{id}")
-	public UserData getUserById(@PathVariable String id) {
-		return service.getUserById(id);
-	}
-
-	/*
-	 * Get of specific user when valid userId is provided. Validations of userId is honored.
-	 */
-	@GetMapping(value = { "/users/sortby" })
-	public List<UserData> getUsersSortBy(@RequestParam(required = true) Map<String, String> pathVarsMap) {
-		return service.getUsersSortBy(pathVarsMap);
-	}
-
-	@GetMapping(value = { "/users/filterByName/{name}", "/users/filterByName" })
-	public List<UserData> getUsersFilterByName(@PathVariable(required = true) String name) {
-		return service.getUsersFilterByName(name);
-	}
-
-	@GetMapping(value = { "/users/filterByAge/{age}", "/users/filterByAge" })
-	public List<UserData> getUsersFilterByAge(@PathVariable(required = true) String age) {
-		return service.getUsersFilterByAge(age);
-	}
-
-	@GetMapping(value = { "/users/paging", "/users/paging/{offset}", "/users/paging/{offset}/{size}",
-			"/users/paging/{offset}/{size}/{field}" })
-	public List<UserData> getUsersPaginatedData(@PathVariable(required = true) Map<String, String> pathVarsMap) {
-		return service.getUsersPageData(pathVarsMap);
+	public List<UserData> getUsersFilterBy(@RequestParam(required = true) Map<String, String> dataQuery) {
+		return service.getUsersFilterBy(dataQuery);
 	}
 
 	/* Exception Handling */

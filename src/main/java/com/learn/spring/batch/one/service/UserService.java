@@ -13,11 +13,11 @@ import com.learn.spring.batch.one.exceptions.UserNotFoundException;
  * Service Interface for User Service
  * */
 public interface UserService {
-	public List<UserData> getAllUsers() throws EmptyUserRepoException;
+	public List<UserData> getAllUsers(String sortType) throws EmptyUserRepoException;
 
 	public UserData getUserById(String id) throws InvalidNumericValueException, UserNotFoundException;
 
-	public List<UserData> getUsersSortBy(String field) throws RequiredFieldsException, EmptyUserRepoException;
+	public List<UserData> getUsersSortBy(Map<String, String> pathVarsMap) throws RequiredFieldsException, EmptyUserRepoException;
 
 	public List<UserData> getUsersFilterByName(String name) throws EmptyUserRepoException;
 

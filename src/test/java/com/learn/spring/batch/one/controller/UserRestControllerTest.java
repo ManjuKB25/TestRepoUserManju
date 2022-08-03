@@ -30,13 +30,13 @@ public class UserRestControllerTest {
 	@Test
 	public void testGetAllUsers() {
 		List<UserData> users = getTestUsers(5);
-		when(mockUserService.getAllUsers()).thenReturn(users);
-		List<UserData> usersList = userRestController.getAllUsers();
+		when(mockUserService.getAllUsers(any(String.class))).thenReturn(users);
+		List<UserData> usersList = userRestController.getAllUsers("desc");
 		assertEquals(5, usersList.size());
 
 		users = getTestUsers(0);
-		when(mockUserService.getAllUsers()).thenReturn(users);
-		usersList = userRestController.getAllUsers();
+		when(mockUserService.getAllUsers(any(String.class))).thenReturn(users);
+		usersList = userRestController.getAllUsers("desc");
 		assertEquals(0, usersList.size());
 
 	}
