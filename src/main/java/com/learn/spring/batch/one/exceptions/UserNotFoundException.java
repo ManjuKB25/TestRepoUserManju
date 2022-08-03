@@ -1,15 +1,9 @@
 package com.learn.spring.batch.one.exceptions;
 
 
-public class UserNotFoundException extends RuntimeException{
-	private String message;
-
-	public UserNotFoundException() {
-	}
-
+public class UserNotFoundException extends CustomException{
 	public UserNotFoundException(String message) {
 		super(message);
-		this.message = message;
 	}
 	
 }

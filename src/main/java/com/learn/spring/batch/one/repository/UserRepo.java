@@ -2,6 +2,7 @@ package com.learn.spring.batch.one.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -20,4 +21,15 @@ public interface UserRepo extends JpaRepository<UserData, Long> {
 			+ " u.name LIKE %?1%"
 			+ " AND u.age = ?2")
 	public List<UserData> findByNameAndAge(String name, Integer age);
+
+	@Query("SELECT u FROM UserData u WHERE "
+			+ " u.name LIKE %?1%"
+			+ " AND u.age = ?2")
+	public List<UserData> findByNameAndAgeAndSort(String name, Integer age,Sort sort);
+
+	public List<UserData> findByAge(int parseUnsignedInt, Sort by);
+
+	@Query("SELECT u FROM UserData u WHERE "
+			+ " u.name LIKE %?1%")
+	public List<UserData> findByName(String name, Sort by);
 }

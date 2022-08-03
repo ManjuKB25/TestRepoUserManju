@@ -45,11 +45,11 @@ public class UserRestControllerTest {
 	public void testGetUserById() {
 		List<UserData> users = getTestUsers(5);
 		when(mockUserService.getUserById(any(String.class))).thenReturn(users.get(0));
-//		UserData usersResult = userRestController.getUserById("100");
-//		assertEquals(100, usersResult.getId());
-//		assertEquals("User0", usersResult.getName());
-//		assertEquals("User 0 Address 1", usersResult.getAddressone());
-//		assertEquals("User 0 Address 2", usersResult.getAddresstwo());
+		UserData usersResult = userRestController.getUserById("100");
+		assertEquals(100, usersResult.getId());
+		assertEquals("User0", usersResult.getName());
+		assertEquals("User 0 Address 1", usersResult.getAddressone());
+		assertEquals("User 0 Address 2", usersResult.getAddresstwo());
 	}
 
 	private List<UserData> getTestUsers(int usersCount) {
