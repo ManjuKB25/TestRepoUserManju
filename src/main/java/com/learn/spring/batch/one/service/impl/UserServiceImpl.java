@@ -119,6 +119,10 @@ public class UserServiceImpl implements UserService {
 			} else {
 				userData = repo.findByAge(Integer.parseUnsignedInt(age), Sort.by(sortby));
 			}
+			if (userData.isEmpty()) {
+				logger.warn("No data existing for this query on filterBy flow");
+				throw new EmptyUserRepoException("No data existing for this query");
+			}
 			return userData;
 		}
 		List<UserData> userData = new ArrayList<UserData>();
@@ -126,6 +130,10 @@ public class UserServiceImpl implements UserService {
 			userData = repo.findByName(name);
 		} else {
 			userData = repo.findByName(name, Sort.by(sortby));
+		}
+		if (userData.isEmpty()) {
+			logger.warn("No data existing for this query on filterBy flow");
+			throw new EmptyUserRepoException("No data existing for this query");
 		}
 		return userData;
 	}
